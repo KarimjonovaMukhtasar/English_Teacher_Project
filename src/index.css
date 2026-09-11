@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light Presentation & Daylight Projector Mode */
+    --color-surface-canvas: #F4FAF8;
+    --color-surface-base: #EAF4F1;
+    --color-surface-card: #FFFFFF;
+    --color-surface-inset: #EEF7F4;
+    --color-surface-border: #D7E6E1;
+    --color-surface-border-strong: #A6C6BE;
+
+    --color-ink-primary: #102A27;
+    --color-ink-secondary: #31534D;
+    --color-ink-muted: #5B716C;
+    --color-ink-inverse: #FFFFFF;
+
+    /* Semantic Clinical Tokens */
+    --color-grammar-text: #0B42A8;
+    --color-grammar-bg: #EFF5FF;
+    --color-grammar-border: #BED6FE;
+
+    --color-vocab-text: #047857;
+    --color-vocab-bg: #ECFDF5;
+    --color-vocab-border: #A7F3D0;
+
+    --color-diagnostic-text: #B45309;
+    --color-diagnostic-bg: #FFFBEB;
+    --color-diagnostic-border: #FDE68A;
+
+    --color-alert-text: #BE123C;
+    --color-alert-bg: #FFF1F2;
+    --color-alert-border: #FECDD3;
+
+    --color-anatomy-text: #4338CA;
+    --color-anatomy-bg: #EEF2FF;
+    --color-anatomy-border: #C7D2FE;
+  }
+
+  .dark {
+    /* Dark Presentation & Smartboard Evening Mode */
+    --color-surface-canvas: #061C1A;
+    --color-surface-base: #0B2926;
+    --color-surface-card: #123532;
+    --color-surface-inset: #1A4641;
+    --color-surface-border: #2D5C55;
+    --color-surface-border-strong: #4B776F;
+
+    --color-ink-primary: #F8FAFC;
+    --color-ink-secondary: #94A3B8;
+    --color-ink-muted: #94A3B8;
+    --color-ink-inverse: #061C1A;
+
+    /* Semantic Clinical Tokens (Dark) */
+    --color-grammar-text: #60A5FA;
+    --color-grammar-bg: rgba(23, 37, 84, 0.4);
+    --color-grammar-border: rgba(59, 130, 246, 0.5);
+
+    --color-vocab-text: #34D399;
+    --color-vocab-bg: rgba(6, 78, 59, 0.4);
+    --color-vocab-border: rgba(16, 185, 129, 0.5);
+
+    --color-diagnostic-text: #FBBF24;
+    --color-diagnostic-bg: rgba(120, 53, 15, 0.4);
+    --color-diagnostic-border: rgba(245, 158, 11, 0.5);
+
+    --color-alert-text: #FB7185;
+    --color-alert-bg: rgba(136, 19, 55, 0.4);
+    --color-alert-border: rgba(244, 63, 94, 0.5);
+
+    --color-anatomy-text: #818CF8;
+    --color-anatomy-bg: rgba(49, 46, 129, 0.4);
+    --color-anatomy-border: rgba(99, 102, 241, 0.5);
+  }
+
+  html, body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  input,
+  textarea,
+  [contenteditable="true"] {
+    user-select: text;
+    -webkit-user-select: text;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #B9D6CF;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #7CB3A7;
+}
