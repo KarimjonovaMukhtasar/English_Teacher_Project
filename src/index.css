@@ -5,16 +5,16 @@
 @layer base {
   :root {
     /* Light Presentation & Daylight Projector Mode */
-    --color-surface-canvas: #F4FAF8;
-    --color-surface-base: #EAF4F1;
+    --color-surface-canvas: #ECFEFF;
+    --color-surface-base: #DDF4F7;
     --color-surface-card: #FFFFFF;
-    --color-surface-inset: #EEF7F4;
-    --color-surface-border: #D7E6E1;
-    --color-surface-border-strong: #A6C6BE;
+    --color-surface-inset: #E6F7F2;
+    --color-surface-border: #A5E4EA;
+    --color-surface-border-strong: #67C8D3;
 
-    --color-ink-primary: #102A27;
-    --color-ink-secondary: #31534D;
-    --color-ink-muted: #5B716C;
+    --color-ink-primary: #0F2F38;
+    --color-ink-secondary: #315E68;
+    --color-ink-muted: #557680;
     --color-ink-inverse: #FFFFFF;
 
     /* Semantic Clinical Tokens */
@@ -103,9 +103,9 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #B9D6CF;
+  background: #67C8D3;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #7CB3A7;
+  background: #0891B2;
 }

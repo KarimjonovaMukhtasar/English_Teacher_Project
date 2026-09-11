@@ -12,6 +12,8 @@ export type PowerPointExportSlide = {
   eyebrow?: string;
   body: string[];
   columns?: [ExportColumn, ExportColumn];
+  imageUrl?: string;
+  imageAlt?: string;
 };
 
 export type PowerPointExportPlan = {
@@ -20,12 +22,12 @@ export type PowerPointExportPlan = {
 };
 
 const WIDE_HEIGHT = 7.5;
-const PRIMARY = '0F766E';
-const DEEP = '123B3A';
+const PRIMARY = '0891B2';
+const DEEP = '164E63';
 const CYAN = '67E8F9';
-const INK = '14212B';
-const MUTED = '52606D';
-const SURFACE = 'F5FAF9';
+const INK = '12343B';
+const MUTED = '4C6B73';
+const SURFACE = 'ECFEFF';
 
 const cleanLine = (value: string | undefined) => value?.trim() || '';
 
@@ -35,25 +37,29 @@ const nonEmptyLines = (lines: Array<string | undefined>) =>
 const exportSlideFrom = (slide: SlideItem, number: number): PowerPointExportSlide => {
   switch (slide.content.type) {
     case 'blank': {
-      const { heading, subheading, paragraphs } = slide.content.data;
+      const { heading, subheading, paragraphs, imageUrl, imageAlt } = slide.content.data;
       return {
         number,
         title: cleanLine(heading) || slide.title,
         eyebrow: cleanLine(subheading),
         body: nonEmptyLines(paragraphs),
+        imageUrl,
+        imageAlt,
       };
     }
     case 'vocabulary-card': {
-      const { word, phonetic, partOfSpeech, definition, translation, exampleSentence } = slide.content.data;
+      const { word, phonetic, partOfSpeech, definition, translation, exampleSentence, imageUrl } = slide.content.data;
       return {
         number,
         title: `Vocabulary: ${word}`,
-        eyebrow: nonEmptyLines([phonetic, partOfSpeech]).join(' · '),
+        eyebrow: nonEmptyLines([phonetic, partOfSpeech]).join(', '),
         body: nonEmptyLines([
           `Meaning: ${definition}`,
           `Uzbek: ${translation}`,
           `Example: ${exampleSentence}`,
         ]),
+        imageUrl,
+        imageAlt: `Medical vocabulary illustration for ${word}`,
       };
     }
     case 'grammar-box': {
@@ -140,7 +146,7 @@ const addHeader = (
   exportedSlide: PowerPointExportSlide,
   totalSlides: number,
 ) => {
-  slide.addText('TILCHI · MEDICAL ENGLISH', {
+  slide.addText('TILCHI MEDICAL ENGLISH', {
     x: 0.65,
     y: 0.35,
     w: 4.2,
@@ -175,7 +181,12 @@ const addHeader = (
   });
 };
 
-const addStandardSlideContent = (slide: any, exportedSlide: PowerPointExportSlide) => {
+const addStandardSlideContent = (
+  slide: any,
+  exportedSlide: PowerPointExportSlide,
+  imageData?: string,
+) => {
+  const hasImage = Boolean(imageData);
   slide.addShape('roundRect', {
     x: 0.55,
     y: 1.02,
@@ -226,7 +237,7 @@ const addStandardSlideContent = (slide: any, exportedSlide: PowerPointExportSlid
   slide.addText(bulletText(exportedSlide.body), {
     x: 0.8,
     y: contentTop,
-    w: 11.75,
+    w: hasImage ? 7.25 : 11.75,
     h: 4.45,
     fontFace: 'Aptos',
     fontSize: bodyFontSize(exportedSlide.body),
@@ -238,6 +249,27 @@ const addStandardSlideContent = (slide: any, exportedSlide: PowerPointExportSlid
     margin: 0.04,
     fit: 'shrink',
   });
+
+  if (imageData) {
+    slide.addShape('roundRect', {
+      x: 8.35,
+      y: 2.02,
+      w: 3.95,
+      h: 3.15,
+      rectRadius: 0.08,
+      fill: { color: SURFACE },
+      line: { color: 'A5E4EA' },
+    });
+    slide.addImage({
+      data: imageData,
+      x: 8.43,
+      y: 2.1,
+      w: 3.79,
+      h: 2.99,
+      sizing: { type: 'contain', x: 8.43, y: 2.1, w: 3.79, h: 2.99 },
+      altText: exportedSlide.imageAlt || 'Medical lesson illustration',
+    });
+  }
 };
 
 const addTwoColumnSlideContent = (slide: any, exportedSlide: PowerPointExportSlide) => {
@@ -310,6 +342,60 @@ const addTwoColumnSlideContent = (slide: any, exportedSlide: PowerPointExportSli
   });
 };
 
+const blobToDataUrl = (blob: Blob) => new Promise<string>((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(String(reader.result));
+  reader.onerror = () => reject(reader.error || new Error('Rasmni o‘qib bo‘lmadi.'));
+  reader.readAsDataURL(blob);
+});
+
+const webpToJpegDataUrl = (blob: Blob) => new Promise<string>((resolve, reject) => {
+  const sourceUrl = URL.createObjectURL(blob);
+  const image = new Image();
+  image.onload = () => {
+    const maxWidth = 1600;
+    const scale = Math.min(1, maxWidth / image.naturalWidth);
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+    const context = canvas.getContext('2d');
+    if (!context) {
+      URL.revokeObjectURL(sourceUrl);
+      reject(new Error('Rasmni PowerPoint formatiga tayyorlab bo‘lmadi.'));
+      return;
+    }
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    URL.revokeObjectURL(sourceUrl);
+    resolve(canvas.toDataURL('image/jpeg', 0.9));
+  };
+  image.onerror = () => {
+    URL.revokeObjectURL(sourceUrl);
+    reject(new Error('WebP rasmni PowerPoint formatiga o‘tkazib bo‘lmadi.'));
+  };
+  image.src = sourceUrl;
+});
+
+const loadPresentationImages = async (plan: PowerPointExportPlan) => {
+  const urls = [...new Set(plan.slides.map((slide) => slide.imageUrl).filter((url): url is string => Boolean(url)))];
+  const imageData = new Map<string, string>();
+
+  await Promise.all(urls.map(async (url) => {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const blob = await response.blob();
+      const dataUrl = blob.type === 'image/webp'
+        ? await webpToJpegDataUrl(blob)
+        : await blobToDataUrl(blob);
+      imageData.set(url, dataUrl);
+    } catch (error) {
+      console.warn(`PowerPoint rasmi yuklanmadi: ${url}`, error);
+    }
+  }));
+
+  return imageData;
+};
+
 export async function downloadLessonPowerPoint(lesson: Lesson): Promise<string> {
   const plan = buildPowerPointExportPlan(lesson);
   if (plan.slides.length === 0) {
@@ -317,6 +403,7 @@ export async function downloadLessonPowerPoint(lesson: Lesson): Promise<string> 
   }
 
   const { default: PptxGenJS } = await import('pptxgenjs');
+  const imageData = await loadPresentationImages(plan);
   const pptx = new PptxGenJS();
   pptx.layout = 'LAYOUT_WIDE';
   pptx.author = 'Tilchi.uz';
@@ -326,7 +413,7 @@ export async function downloadLessonPowerPoint(lesson: Lesson): Promise<string> 
 
   plan.slides.forEach((exportedSlide) => {
     const slide = pptx.addSlide();
-    slide.background = { color: 'EAF5F3' };
+    slide.background = { color: 'E6F7FA' };
     slide.addShape('rect', {
       x: 0,
       y: 0,
@@ -339,7 +426,11 @@ export async function downloadLessonPowerPoint(lesson: Lesson): Promise<string> 
     if (exportedSlide.columns) {
       addTwoColumnSlideContent(slide, exportedSlide);
     } else {
-      addStandardSlideContent(slide, exportedSlide);
+      addStandardSlideContent(
+        slide,
+        exportedSlide,
+        exportedSlide.imageUrl ? imageData.get(exportedSlide.imageUrl) : undefined,
+      );
     }
     slide.addText('Tahrirlanadigan o‘qituvchi nusxasi', {
       x: 0.65,

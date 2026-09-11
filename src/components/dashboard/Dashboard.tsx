@@ -442,7 +442,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               title="O'qituvchi profili, xavfsizlik va sozlamalar"
             >
               <div
-                style={{ backgroundColor: currentUser?.avatarColor || '#0F766E' }}
+                style={{ backgroundColor: currentUser?.avatarColor || '#0891B2' }}
                 className="flex h-9 w-9 items-center justify-center rounded-xl text-xs font-bold text-white shadow-xs ring-2 ring-stone-200/60 shrink-0"
               >
                 {getInitials(currentUser?.fullName || teacherName)}
@@ -588,23 +588,28 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     aria-pressed={isSelected}
                     aria-label={faculty.number + '-fakultet: ' + faculty.title + '. ' + presentationCount + ' taqdimot, ' + slideCount + ' slayd.'}
                     className={
-                      'min-h-48 rounded-2xl border p-4 text-left transition duration-200 focus:outline-none focus:ring-4 focus:ring-brand-500/20 ' +
+                      'group min-h-64 overflow-hidden rounded-2xl border p-4 text-left transition duration-200 focus:outline-none focus:ring-4 focus:ring-brand-500/20 ' +
                       (isSelected
                         ? 'border-brand-600 bg-brand-50 shadow-sm'
                         : 'border-slate-200 bg-white hover:border-brand-300 hover:bg-surface-inset')
                     }
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <span className={
-                        'inline-flex h-9 min-w-9 items-center justify-center rounded-lg border px-2 font-mono text-xs font-bold ' +
-                        (isSelected ? 'border-brand-200 bg-white text-brand-800' : 'border-slate-200 bg-slate-50 text-slate-600')
-                      }>
+                    <div className="relative -mx-4 -mt-4 mb-4 aspect-[16/7] overflow-hidden bg-brand-900">
+                      <img
+                        src={faculty.imageUrl}
+                        alt={faculty.imageAlt}
+                        width={1672}
+                        height={941}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-brand-950/85 via-brand-950/10 to-transparent" aria-hidden="true" />
+                      <span className="absolute bottom-3 left-3 inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-white/50 bg-brand-950/75 px-2 font-mono text-xs font-bold text-white backdrop-blur-sm">
                         {faculty.number}
                       </span>
-                      <span className={
-                        'text-xs font-semibold ' + (isSelected ? 'text-brand-700' : 'text-slate-500')
-                      }>
-                        {isSelected ? 'Ko‘rsatilmoqda' : 'Fakultetni ochish'}
+                      <span className="absolute bottom-3 right-3 rounded-full border border-white/40 bg-white/90 px-2.5 py-1 text-[11px] font-bold text-brand-900">
+                        {isSelected ? 'Ko‘rsatilmoqda' : 'Ochish'}
                       </span>
                     </div>
                     <h3 className="mt-4 text-base font-bold leading-snug text-slate-900">{faculty.title}</h3>
@@ -774,6 +779,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 const isFormative = lesson.assessmentType === 'formative';
                 const isSummative = lesson.assessmentType === 'summative';
                 const isDownloading = downloadingLessonId === lesson.id;
+                const coverSlide = lesson.slides?.find((slide) => slide.order === 0);
+                const coverImage = coverSlide?.content.type === 'blank' ? coverSlide.content.data : null;
 
                 return (
                   <div
@@ -782,6 +789,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   >
                     {/* Top Badges */}
                     <div>
+                      {coverImage?.imageUrl && (
+                        <div className="mb-4 aspect-[16/7] overflow-hidden rounded-2xl border border-brand-100 bg-brand-50">
+                          <img
+                            src={coverImage.imageUrl}
+                            alt={coverImage.imageAlt || `${lesson.title} medical illustration`}
+                            width={1672}
+                            height={941}
+                            loading="lazy"
+                            decoding="async"
+                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.025]"
+                          />
+                        </div>
+                      )}
                       <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                         <div className="flex flex-wrap items-center gap-1.5">
                           {isFormative && (

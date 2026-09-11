@@ -1,13 +1,17 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { SUPPLIED_FACULTIES, createSuppliedFacultyLessons } from './facultyCurriculum.ts';
+import {
+  SUPPLIED_FACULTIES,
+  createSuppliedFacultyLessons,
+  refreshSuppliedLessonVisuals,
+} from './facultyCurriculum.ts';
 
 test('creates the supplied faculty lesson plans in their source order', () => {
   const lessons = createSuppliedFacultyLessons();
 
   assert.deepEqual(
     SUPPLIED_FACULTIES.map((faculty) => faculty.id),
-    ['Nursing', 'Feldsherlik ishi', 'Functional Diagnostics', 'Pharmacy'],
+    ['Nursing', 'Functional Diagnostics', 'Feldsherlik ishi', 'Pharmacy'],
   );
   assert.equal(lessons.length, 83);
 
@@ -40,7 +44,7 @@ test('keeps the supplied lesson-plan handouts visible in every generated deck', 
     assert.ok(lesson.slides?.some((slide) => slide.template === 'grammar-box'));
     assert.ok(lesson.slides?.some((slide) => slide.title.includes('Reading')));
     assert.ok(lesson.slides?.some((slide) => slide.title.includes('Listening')));
-    assert.ok(lesson.slides?.some((slide) => slide.title.includes('Role-play')));
+    assert.ok(lesson.slides?.some((slide) => slide.title.includes('information gap')));
     assert.ok(lesson.slides?.some((slide) => slide.title.includes('Writing')));
   }
 
@@ -58,4 +62,75 @@ test('keeps the supplied lesson-plan handouts visible in every generated deck', 
     readingReview?.content.type === 'two-column' ? readingReview.content.data.rightPoints.join('\n') : '',
     /oesophagus|stomach|duodenum/i,
   );
+});
+
+test('gives every presentation distinct faculty and clinical illustrations', () => {
+  const lessons = createSuppliedFacultyLessons();
+
+  for (const lesson of lessons) {
+    const imageUrls = (lesson.slides || []).flatMap((slide) => {
+      if (slide.content.type === 'blank' && slide.content.data.imageUrl) {
+        return [slide.content.data.imageUrl];
+      }
+      if (slide.content.type === 'vocabulary-card' && slide.content.data.imageUrl) {
+        return [slide.content.data.imageUrl];
+      }
+      return [];
+    });
+
+    assert.ok(
+      new Set(imageUrls).size >= 2,
+      `${lesson.id} must use at least two distinct medical illustrations`,
+    );
+  }
+});
+
+test('refreshes generated visuals without replacing a teacher’s lesson edits', () => {
+  const generated = createSuppliedFacultyLessons().find((lesson) => lesson.id === 'faculty_nursing_01');
+  assert.ok(generated?.slides);
+
+  const existing = structuredClone(generated);
+  existing.title = 'My edited lesson title';
+  existing.curriculumRevision = 'older-revision';
+
+  const cover = existing.slides?.find((slide) => slide.order === 0);
+  assert.ok(cover?.content.type === 'blank');
+  if (cover?.content.type === 'blank') {
+    cover.content.data.heading = 'Teacher edited heading';
+    cover.content.data.paragraphs = ['Teacher edited objective'];
+    cover.content.data.imageUrl = '/old-cover.png';
+  }
+
+  const vocabulary = existing.slides?.find((slide) => slide.order === 4);
+  assert.ok(vocabulary?.content.type === 'vocabulary-card');
+  if (vocabulary?.content.type === 'vocabulary-card') {
+    vocabulary.content.data.word = 'teacher-edited-term';
+    vocabulary.content.data.imageUrl = '/old-vocabulary.png';
+  }
+
+  const refreshed = refreshSuppliedLessonVisuals(existing, generated);
+  const refreshedCover = refreshed.slides?.find((slide) => slide.order === 0);
+  const generatedCover = generated.slides.find((slide) => slide.order === 0);
+  const refreshedVocabulary = refreshed.slides?.find((slide) => slide.order === 4);
+  const generatedVocabulary = generated.slides.find((slide) => slide.order === 4);
+
+  assert.equal(refreshed.title, 'My edited lesson title');
+  assert.ok(refreshedCover?.content.type === 'blank');
+  assert.ok(generatedCover?.content.type === 'blank');
+  if (refreshedCover?.content.type === 'blank' && generatedCover?.content.type === 'blank') {
+    assert.equal(refreshedCover.content.data.heading, 'Teacher edited heading');
+    assert.deepEqual(refreshedCover.content.data.paragraphs, ['Teacher edited objective']);
+    assert.equal(refreshedCover.content.data.imageUrl, generatedCover.content.data.imageUrl);
+    assert.equal(refreshedCover.content.data.imageAlt, generatedCover.content.data.imageAlt);
+  }
+
+  assert.ok(refreshedVocabulary?.content.type === 'vocabulary-card');
+  assert.ok(generatedVocabulary?.content.type === 'vocabulary-card');
+  if (refreshedVocabulary?.content.type === 'vocabulary-card' && generatedVocabulary?.content.type === 'vocabulary-card') {
+    assert.equal(refreshedVocabulary.content.data.word, 'teacher-edited-term');
+    assert.equal(refreshedVocabulary.content.data.imageUrl, generatedVocabulary.content.data.imageUrl);
+  }
+
+  assert.equal(refreshed.curriculumRevision, generated.curriculumRevision);
+  assert.equal(refreshed.unit, generated.unit);
 });

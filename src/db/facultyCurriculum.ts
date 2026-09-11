@@ -29,7 +29,7 @@ type SourceFaculty = {
 const sourceFaculties = suppliedLessonPlans.faculties as SourceFaculty[];
 const SOURCE_DATE = Date.UTC(2026, 8, 10);
 
-export const SUPPLIED_FACULTY_CURRICULUM_REVISION = '2026-09-10-faculty-docx-v1';
+export const SUPPLIED_FACULTY_CURRICULUM_REVISION = '2026-09-11-faculty-interactive-visuals-v2';
 
 export const SUPPLIED_FACULTIES = [
   {
@@ -39,22 +39,28 @@ export const SUPPLIED_FACULTIES = [
     lessonCount: 21,
     description: 'Patient care, communication, hygiene, medication and assessment.',
     accent: 'Teal',
-  },
-  {
-    id: 'Feldsherlik ishi',
-    number: '02',
-    title: 'Feldsherlik ishi',
-    lessonCount: 20,
-    description: 'Pain communication, ageing, therapy, blood and mental health.',
-    accent: 'Blue',
+    imageUrl: '/course2/faculty-nursing-cover.webp',
+    imageAlt: 'Nurse checking a patient’s radial pulse in a hospital room',
   },
   {
     id: 'Functional Diagnostics',
-    number: '03',
+    number: '02',
     title: 'Functional Diagnostics',
     lessonCount: 21,
     description: 'Hospital communication, admission, emergencies and observation.',
-    accent: 'Violet',
+    accent: 'Cyan',
+    imageUrl: '/course2/faculty-functional-diagnostics-cover.webp',
+    imageAlt: 'Functional diagnostics specialist performing ECG and ultrasound assessment',
+  },
+  {
+    id: 'Feldsherlik ishi',
+    number: '03',
+    title: 'Feldsherlik ishi',
+    lessonCount: 20,
+    description: 'Pain communication, ageing, therapy, blood and mental health.',
+    accent: 'Green',
+    imageUrl: '/course2/faculty-feldsherlik-cover.webp',
+    imageAlt: 'Feldsher checking a patient’s blood pressure in an ambulance',
   },
   {
     id: 'Pharmacy',
@@ -63,6 +69,8 @@ export const SUPPLIED_FACULTIES = [
     lessonCount: 21,
     description: 'Patient safety, healthy living, medicines and professional language.',
     accent: 'Amber',
+    imageUrl: '/course2/faculty-pharmacy-cover.webp',
+    imageAlt: 'Pharmacist explaining safe medicine use to a patient',
   },
 ] as const;
 
@@ -80,6 +88,14 @@ const answerFor = (lesson: SourceLesson, matches: string[]) => {
 };
 
 type LessonIllustration = { imageUrl: string; imageAlt: string };
+
+const facultyCoverFor = (faculty: SourceFaculty): LessonIllustration => {
+  const cover = SUPPLIED_FACULTIES.find((item) => item.id === faculty.id);
+  return {
+    imageUrl: cover?.imageUrl || '/course2/faculty-nursing-cover.webp',
+    imageAlt: cover?.imageAlt || 'Medical English faculty lesson',
+  };
+};
 
 const illustrationFor = (faculty: SourceFaculty, lesson: SourceLesson): LessonIllustration => {
   const topic = lesson.title.toLowerCase();
@@ -141,6 +157,7 @@ const lessonSlides = (faculty: SourceFaculty, lesson: SourceLesson): SlideItem[]
   const listeningAnswers = answerFor(lesson, ['listening']);
   const quizAnswers = answerFor(lesson, ['mini-quiz', 'quiz']);
   const illustration = illustrationFor(faculty, lesson);
+  const facultyCover = facultyCoverFor(faculty);
   const titlePrefix = `Lesson ${String(lesson.number).padStart(2, '0')}`;
   const sourceNotice = 'Source: supplied lesson plan and student handouts. Classroom case language is educational; it is not clinical protocol.';
 
@@ -185,10 +202,10 @@ const lessonSlides = (faculty: SourceFaculty, lesson: SourceLesson): SlideItem[]
   const listeningQuestion = lesson.listening.questions[0] || 'What key detail did you hear?';
 
   return [
-    blank(`${titlePrefix}: lesson plan`, lesson.title, clean(lesson.objectives, 4), 0, `${faculty.id} · 80 minutes`, sourceNotice, illustration),
-    columns('Lesson route · 80 minutes', 'Plan stages 1–3', clean(lesson.stages.slice(0, 3).map((stage) => `${stage.number}. ${stage.label} · ${stage.minutes} min — ${stage.detail}`), 3), 'Plan stages 4–7', clean(lesson.stages.slice(3).map((stage) => `${stage.number}. ${stage.label} · ${stage.minutes} min — ${stage.detail}`), 4), 1, 'Follow the supplied timing. Adjust pacing only for the actual class, not the source content.'),
-    columns('Visual vocabulary · set A', 'Terms 1–3', vocabGroups[0].slice(0, 3).map((item) => `${item.term} — ${item.translation}`), 'Terms 4–6', vocabGroups[0].slice(3).map((item) => `${item.term} — ${item.translation}`), 2),
-    columns('Visual vocabulary · set B', 'Terms 7–9', vocabGroups[1].slice(0, 3).map((item) => `${item.term} — ${item.translation}`), 'Terms 10–12', vocabGroups[1].slice(3).map((item) => `${item.term} — ${item.translation}`), 3),
+    blank(`${titlePrefix}: lesson plan`, lesson.title, clean(lesson.objectives, 4), 0, `${faculty.id}, 80 minutes`, sourceNotice, facultyCover),
+    columns('80 minute lesson route', 'Plan stages 1 to 3', clean(lesson.stages.slice(0, 3).map((stage) => `${stage.number}. ${stage.label} (${stage.minutes} min): ${stage.detail}`), 3), 'Plan stages 4 to 7', clean(lesson.stages.slice(3).map((stage) => `${stage.number}. ${stage.label} (${stage.minutes} min): ${stage.detail}`), 4), 1, 'Follow the supplied timing. Adjust pacing only for the actual class, not the source content.'),
+    columns('Visual vocabulary set A', 'Terms 1 to 3', vocabGroups[0].slice(0, 3).map((item) => `${item.term}: ${item.translation}`), 'Terms 4 to 6', vocabGroups[0].slice(3).map((item) => `${item.term}: ${item.translation}`), 2),
+    columns('Visual vocabulary set B', 'Terms 7 to 9', vocabGroups[1].slice(0, 3).map((item) => `${item.term}: ${item.translation}`), 'Terms 10 to 12', vocabGroups[1].slice(3).map((item) => `${item.term}: ${item.translation}`), 3),
     {
       id: `${faculty.slug}-${lesson.number}-4`, title: `Vocabulary card: ${firstVocabulary.term}`, order: 4, template: 'vocabulary-card',
       speakerNotes: 'Use Handout 1 where provided. For an assessment lesson, ask learners to justify the meaning from the assessment text.',
@@ -201,15 +218,15 @@ const lessonSlides = (faculty: SourceFaculty, lesson: SourceLesson): SlideItem[]
       content: { type: 'grammar-box', data: { ruleTitle: lesson.grammar.title || 'Grammar and professional language', formula: grammarExamples.slice(0, 4).map((item, index) => ({ label: item.label || `Point ${index + 1}`, text: short(item.text, 180), color: index % 2 ? 'bg-cyan-100 border-cyan-300 text-cyan-950' : 'bg-teal-100 border-teal-300 text-teal-950' })), explanation: short(lesson.grammar.notes[0] || 'Use the source handout to notice the language pattern.'), examples: lesson.grammar.practice.slice(0, 3).map((sentence) => ({ sentence: short(sentence, 200), highlightWord: '', translation: '' })), note: sourceNotice } },
     },
     check('Grammar practice', lesson.grammar.practice[0] || 'Complete the first professional-language task in the supplied handout.', answerFor(lesson, ['practice a', 'grammar'])[0] || 'Compare your response with the teacher answer key.', 'Use the handout’s grammar focus and check the source answer key together.', 7, 'Grammar check'),
-    blank(lesson.reading.title || 'Reading', lesson.reading.title || 'Reading', clean(lesson.reading.body, 3, 460), 8, 'Handout 3 · read for evidence'),
+    blank(lesson.reading.title || 'Reading', lesson.reading.title || 'Reading', clean(lesson.reading.body, 3, 460), 8, 'Handout 3: read for evidence'),
     columns('Reading for evidence', 'Questions', clean(lesson.reading.questions, 3), 'Answer approach', ['Underline the source sentence for each answer.', 'Compare evidence with a partner before teacher feedback.'], 9, readingAnswers.length ? `Teacher-only reading key:\n${readingAnswers.join('\n')}` : undefined),
     check('Reading check', readingQuestion, readingAnswers[0] || 'Use the supporting sentence from the reading.', 'Reveal only after learners locate the relevant evidence in the supplied reading.', 10, 'Reading'),
-    blank(lesson.listening.title || 'Listening', lesson.listening.title || 'Listening', clean([...lesson.listening.directions, ...lesson.listening.questions], 5), 11, 'Handout 4 · listen twice'),
+    blank(lesson.listening.title || 'Listening', lesson.listening.title || 'Listening', clean([...lesson.listening.directions, ...lesson.listening.questions], 5), 11, 'Handout 4: listen twice'),
     check('Listening check', listeningQuestion, listeningAnswers[0] || 'Listen again and record the exact detail.', 'The full teacher script is retained in speaker notes for this slide.', 12, 'Listening'),
     columns('Listening reflection', 'Questions', clean(lesson.listening.questions, 3), 'After listening', ['Compare the exact words you heard.', 'Ask for one replay only after your pair has agreed.'], 13, `Teacher-only listening script:\n${lesson.listening.script.join('\n')}\n\nTeacher-only answer key:\n${listeningAnswers.join('\n')}`),
-    columns('Role-play · information gap', 'Student A', [short(lesson.speaking.roleA, 430)], 'Student B', [short(lesson.speaking.roleB, 430)], 14, 'Keep the role cards separate until the exchange is complete.'),
+    columns('Clinical information gap', 'Student A', [short(lesson.speaking.roleA, 430)], 'Student B', [short(lesson.speaking.roleB, 430)], 14, 'Keep the role cards separate until the exchange is complete.'),
     blank('Speaking outcome', 'Communicate, then reflect', clean([lesson.speaking.outcome, ...lesson.speaking.prompts], 4), 15, 'Handout 5'),
-    blank('Writing transfer · culture / extension', lesson.culture.title || 'Writing transfer · culture / extension', clean([
+    blank('Writing and culture extension', lesson.culture.title || 'Writing and culture extension', clean([
       ...(lesson.culture.notes.length ? lesson.culture.notes : [lesson.speaking.outcome]),
       'Writing transfer: write 3–4 evidence-based sentences using today’s vocabulary and grammar focus.',
       'Use the lesson-plan outcome as the communication frame. Add no unsupported clinical claims.',
@@ -245,5 +262,61 @@ export const createSuppliedFacultyLessons = (): Lesson[] =>
       slides: lessonSlides(faculty, sourceLesson),
     })),
   );
+
+export const refreshSuppliedLessonVisuals = (existing: Lesson, generated: Lesson): Lesson => {
+  const generatedSlides = new Map((generated.slides || []).map((slide) => [slide.order, slide]));
+  const slides = existing.slides?.map((slide) => {
+    const generatedSlide = generatedSlides.get(slide.order);
+
+    if (
+      slide.order === 0 &&
+      slide.content.type === 'blank' &&
+      generatedSlide?.content.type === 'blank'
+    ) {
+      return {
+        ...slide,
+        content: {
+          ...slide.content,
+          data: {
+            ...slide.content.data,
+            imageUrl: generatedSlide.content.data.imageUrl,
+            imageAlt: generatedSlide.content.data.imageAlt,
+          },
+        },
+      };
+    }
+
+    if (
+      slide.order === 4 &&
+      slide.content.type === 'vocabulary-card' &&
+      generatedSlide?.content.type === 'vocabulary-card'
+    ) {
+      return {
+        ...slide,
+        content: {
+          ...slide.content,
+          data: {
+            ...slide.content.data,
+            imageUrl: generatedSlide.content.data.imageUrl,
+          },
+        },
+      };
+    }
+
+    return slide;
+  });
+
+  return {
+    ...existing,
+    semester: generated.semester,
+    unit: generated.unit,
+    topicNumber: generated.topicNumber,
+    cefrLevel: generated.cefrLevel,
+    clinicalDomain: generated.clinicalDomain,
+    assessmentType: generated.assessmentType,
+    curriculumRevision: generated.curriculumRevision,
+    slides,
+  };
+};
 
 export const SUPPLIED_FACULTY_LESSONS = createSuppliedFacultyLessons();

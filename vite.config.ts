@@ -13,8 +13,8 @@ export default defineConfig({
         name: 'English Teacher Presentation System',
         short_name: 'TeacherPresenter',
         description: 'Interactive Presentation and Teaching Platform for English Teachers',
-        theme_color: '#2563eb',
-        background_color: '#ffffff',
+        theme_color: '#0891B2',
+        background_color: '#ECFEFF',
         display: 'standalone',
         icons: [
           {

@@ -70,6 +70,14 @@ test('keeps every supplied faculty lesson as a downloadable 20-slide presentatio
   assert.ok(
     SUPPLIED_FACULTY_LESSONS.every((courseLesson) => buildPowerPointExportPlan(courseLesson).slides.length === 20),
   );
+  assert.ok(
+    SUPPLIED_FACULTY_LESSONS.every((courseLesson) => {
+      const imageUrls = buildPowerPointExportPlan(courseLesson).slides
+        .map((slide) => slide.imageUrl)
+        .filter(Boolean);
+      return new Set(imageUrls).size >= 2;
+    }),
+  );
 });
 
 test('does not print a click-to-reveal answer into the student-facing PowerPoint slide', () => {

@@ -1,6 +1,7 @@
 import { Lesson, StudentGroup } from '@/types';
 import { deleteLesson, getLessonById, getLessons, getSettings, getStudentGroups, saveLesson, saveStudentGroup } from './dexie';
 import { MEDICAL_LESSONS, MEDICAL_STUDENT_GROUPS } from './medicalCurriculum';
+import { refreshSuppliedLessonVisuals } from './facultyCurriculum';
 
 export const INITIAL_STUDENT_GROUPS: StudentGroup[] = [
   ...MEDICAL_STUDENT_GROUPS,
@@ -464,20 +465,21 @@ export async function installCourse2Curriculum(): Promise<void> {
     if (!existing || (existing.slides?.length || 0) < MINIMUM_COURSE_2_SLIDE_COUNT) {
       await saveLesson(lesson);
     } else if (existing.curriculumRevision !== lesson.curriculumRevision) {
-      const slides = isUneditedLegacyCourse2Plan(existing)
-        ? existing.slides?.map((slide) =>
-            slide.order === 0 ? lesson.slides?.find((candidate) => candidate.order === 0) || slide : slide,
-          )
-        : existing.slides;
-
-      // Refresh only the untouched, generated lesson-plan slide. All teacher edits
-      // to the rest of the deck remain in place.
-      await saveLesson({
-        ...existing,
-        slides,
-        unit: lesson.unit,
-        curriculumRevision: lesson.curriculumRevision,
-      });
+      if (isUneditedLegacyCourse2Plan(existing)) {
+        const slides = existing.slides?.map((slide) =>
+          slide.order === 0 ? lesson.slides?.find((candidate) => candidate.order === 0) || slide : slide,
+        );
+        await saveLesson({
+          ...existing,
+          slides,
+          unit: lesson.unit,
+          curriculumRevision: lesson.curriculumRevision,
+        });
+      } else {
+        // Refresh only generated illustration fields and structural metadata.
+        // Teacher-authored wording, answers and slide edits stay untouched.
+        await saveLesson(refreshSuppliedLessonVisuals(existing, lesson));
+      }
     } else if (existing.unit !== lesson.unit) {
       // Keep a teacher's edited slides, but migrate the course navigation to its faculty.
       await saveLesson({ ...existing, unit: lesson.unit });
