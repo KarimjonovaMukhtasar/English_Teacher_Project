@@ -89,7 +89,7 @@ test('does not print a click-to-reveal answer into the student-facing PowerPoint
         title: 'Protected answer',
         order: 0,
         template: 'click-to-reveal',
-        speakerNotes: 'Teacher-only answer: Teacher-only response',
+        speakerNotes: 'Give learners think time before revealing the answer.',
         content: {
           type: 'click-to-reveal',
           data: {

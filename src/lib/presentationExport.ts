@@ -91,7 +91,11 @@ const exportSlideFrom = (slide: SlideItem, number: number): PowerPointExportSlid
           hint ? `Hint: ${hint}` : '',
           'Teacher-controlled answer: reveal it in Tilchi Presenter or teacher notes.',
         ]),
-        teacherNotes: cleanLine(slide.speakerNotes),
+        teacherNotes: nonEmptyLines([
+          slide.speakerNotes,
+          `Answer: ${hiddenAnswer}`,
+          `Rationale: ${explanation}`,
+        ]).join('\n\n'),
       };
     }
     case 'two-column': {
