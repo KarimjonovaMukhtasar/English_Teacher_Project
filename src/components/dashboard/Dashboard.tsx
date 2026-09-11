@@ -341,31 +341,31 @@ export const Dashboard: React.FC<DashboardProps> = ({
   return (
     <div className="min-h-screen bg-surface-canvas text-ink-primary pb-16">
       {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-30 border-b border-surface-border bg-surface-card px-6 py-3.5 shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
+      <header className="sticky top-0 z-30 border-b border-surface-border bg-surface-card px-3 py-3 shadow-sm sm:px-6 sm:py-3.5">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2">
           {/* Tilchi Brand Logo */}
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-600 text-white shadow-md shadow-brand-600/20 ring-2 ring-brand-600/10">
-              <span className="text-2xl font-black">t</span>
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white shadow-md shadow-brand-600/20 ring-2 ring-brand-600/10 sm:h-11 sm:w-11">
+              <span className="text-xl font-black sm:text-2xl">t</span>
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <h1 className="text-xl font-black tracking-tight text-stone-900">
+                <h1 className="text-lg font-black tracking-tight text-stone-900 sm:text-xl">
                   tilchi
                 </h1>
                 <span className="text-lg font-black text-brand-600">.uz</span>
-                <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-bold text-brand-600 uppercase tracking-wide border border-brand-200">
+                <span className="hidden rounded-full border border-brand-200 bg-brand-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-600 lg:inline-flex">
                   app.tilchi.uz
                 </span>
               </div>
-              <p className="text-[11px] text-stone-500 font-medium">
+              <p className="hidden text-[11px] font-medium text-stone-500 md:block">
                 Tilchi Presenter - O'qituvchi boshqaruv paneli
               </p>
             </div>
           </div>
 
           {/* Right Action buttons */}
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             {/* Direct Link to tilchi.uz */}
             <a
               href="https://tilchi.uz"
@@ -382,7 +382,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <button
               type="button"
               onClick={handleExportBackup}
-              className="flex items-center gap-1.5 rounded-xl border border-stone-200 bg-white px-2.5 sm:px-3 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition active:scale-[0.96] shadow-xs"
+              className="hidden items-center gap-1.5 rounded-xl border border-stone-200 bg-white px-2.5 py-2 text-xs font-semibold text-stone-700 shadow-xs transition hover:bg-stone-50 active:scale-[0.96] md:flex sm:px-3"
               title="Barcha darslar va guruhlarni zaxiralash (Eksport JSON)"
             >
               <Download className="h-3.5 w-3.5 text-emerald-600" />
@@ -400,7 +400,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <button
               type="button"
               onClick={() => backupInputRef.current?.click()}
-              className="flex items-center gap-1.5 rounded-xl border border-stone-200 bg-white px-2.5 sm:px-3 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition active:scale-[0.96] shadow-xs"
+              className="hidden items-center gap-1.5 rounded-xl border border-stone-200 bg-white px-2.5 py-2 text-xs font-semibold text-stone-700 shadow-xs transition hover:bg-stone-50 active:scale-[0.96] md:flex sm:px-3"
               title="Zaxiradan qayta tiklash (Import JSON)"
             >
               <Upload className="h-3.5 w-3.5 text-brand-600" />
@@ -415,7 +415,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               title="O'quvchilar guruhini tanlash yoki o'zgartirish"
             >
               <Users className="h-3.5 w-3.5 text-brand-600 shrink-0" />
-              <span className="flex items-center gap-1">
+              <span className="hidden items-center gap-1 sm:flex">
                 <span className="hidden lg:inline text-stone-500">Guruh:</span>
                 <strong className="text-stone-900 max-w-[70px] sm:max-w-[110px] truncate">
                   {activeGroup?.name || 'Guruh'}
@@ -473,15 +473,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </header>
 
       {/* Main Content Area */}
-      <main className="mx-auto max-w-7xl px-6 pt-8">
+      <main className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 sm:pt-8">
         {/* Banner with Welcome & Actions */}
-        <div className="relative overflow-hidden rounded-3xl bg-brand-700 p-8 text-white shadow-xl shadow-brand-600/15">
+        <div className="relative overflow-hidden rounded-3xl bg-brand-700 p-5 text-white shadow-xl shadow-brand-600/15 sm:p-8">
           <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div className="max-w-xl">
               <span className="inline-flex rounded-full bg-white/20 px-3 py-1 text-xs font-bold text-white mb-3 border border-white/30">
                 {currentUser?.role || 'Ingliz tili metodikasi va interaktiv darslar'}
               </span>
-              <h2 className="text-3xl font-extrabold tracking-tight">
+              <h2 className="text-2xl font-extrabold tracking-tight sm:text-3xl">
                 Xush kelibsiz, {currentUser?.fullName || teacherName}!
               </h2>
               <p className="mt-2 text-sm text-white/90 leading-relaxed">
