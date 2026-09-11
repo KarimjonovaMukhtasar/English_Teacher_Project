@@ -14,6 +14,7 @@ export type PowerPointExportSlide = {
   columns?: [ExportColumn, ExportColumn];
   imageUrl?: string;
   imageAlt?: string;
+  teacherNotes?: string;
 };
 
 export type PowerPointExportPlan = {
@@ -45,6 +46,7 @@ const exportSlideFrom = (slide: SlideItem, number: number): PowerPointExportSlid
         body: nonEmptyLines(paragraphs),
         imageUrl,
         imageAlt,
+        teacherNotes: cleanLine(slide.speakerNotes),
       };
     }
     case 'vocabulary-card': {
@@ -60,6 +62,7 @@ const exportSlideFrom = (slide: SlideItem, number: number): PowerPointExportSlid
         ]),
         imageUrl,
         imageAlt: `Medical vocabulary illustration for ${word}`,
+        teacherNotes: cleanLine(slide.speakerNotes),
       };
     }
     case 'grammar-box': {
@@ -74,6 +77,7 @@ const exportSlideFrom = (slide: SlideItem, number: number): PowerPointExportSlid
           ...examples.map((example) => `Example: ${example.sentence}${example.translation ? ` (${example.translation})` : ''}`),
           note ? `Teacher note: ${note}` : '',
         ]),
+        teacherNotes: cleanLine(slide.speakerNotes),
       };
     }
     case 'click-to-reveal': {
@@ -87,6 +91,7 @@ const exportSlideFrom = (slide: SlideItem, number: number): PowerPointExportSlid
           hint ? `Hint: ${hint}` : '',
           'Teacher-controlled answer: reveal it in Tilchi Presenter or teacher notes.',
         ]),
+        teacherNotes: cleanLine(slide.speakerNotes),
       };
     }
     case 'two-column': {
@@ -99,6 +104,7 @@ const exportSlideFrom = (slide: SlideItem, number: number): PowerPointExportSlid
           { title: leftTitle, badge: leftBadge, points: nonEmptyLines(leftPoints) },
           { title: rightTitle, badge: rightBadge, points: nonEmptyLines(rightPoints) },
         ],
+        teacherNotes: cleanLine(slide.speakerNotes),
       };
     }
   }
@@ -431,6 +437,9 @@ export async function downloadLessonPowerPoint(lesson: Lesson): Promise<string> 
         exportedSlide,
         exportedSlide.imageUrl ? imageData.get(exportedSlide.imageUrl) : undefined,
       );
+    }
+    if (exportedSlide.teacherNotes) {
+      slide.addNotes(exportedSlide.teacherNotes);
     }
     slide.addText('Tahrirlanadigan o‘qituvchi nusxasi', {
       x: 0.65,

@@ -89,6 +89,7 @@ test('does not print a click-to-reveal answer into the student-facing PowerPoint
         title: 'Protected answer',
         order: 0,
         template: 'click-to-reveal',
+        speakerNotes: 'Teacher-only answer: Teacher-only response',
         content: {
           type: 'click-to-reveal',
           data: {
@@ -104,4 +105,5 @@ test('does not print a click-to-reveal answer into the student-facing PowerPoint
   const exportSlide = buildPowerPointExportPlan(protectedCheck).slides[0];
   assert.doesNotMatch(exportSlide.body.join('\n'), /Teacher-only response/);
   assert.match(exportSlide.body.join('\n'), /Teacher-controlled answer/);
+  assert.match(exportSlide.teacherNotes || '', /Teacher-only response/);
 });
